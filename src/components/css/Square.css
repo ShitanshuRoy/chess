@@ -1,0 +1,64 @@
+.Square {
+  width: 80px;
+  height: 80px;
+  float: left;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-position: center;
+  background-size: contain;
+  background-color: #e6e6e6;
+  background-repeat: no-repeat;
+  transition: 300ms;
+  pointer-events: none;
+}
+.Square-black {
+  background-color: #4d4d4d;
+}
+.Square-hovered {
+  background-color: red;
+}
+
+.Square-dragged {
+  background-color: blue;
+}
+.Square-path {
+  background-color: green;
+}
+.Square-pawn-white {
+  background-image: url(../img/pieces/white/pawn.svg);
+}
+.Square-rook-white {
+  background-image: url(../img/pieces/white/rook.svg);
+}
+.Square-bishop-white {
+  background-image: url(../img/pieces/white/bishop.svg);
+}
+.Square-knight-white {
+  background-image: url(../img/pieces/white/knight.svg);
+}
+.Square-king-white {
+  background-image: url(../img/pieces/white/king.svg);
+}
+.Square-queen-white {
+  background-image: url(../img/pieces/white/queen.svg);
+}
+
+.Square-pawn-black {
+  background-image: url(../img/pieces/black/pawn.svg);
+}
+.Square-rook-black {
+  background-image: url(../img/pieces/black/rook.svg);
+}
+.Square-bishop-black {
+  background-image: url(../img/pieces/black/bishop.svg);
+}
+.Square-knight-black {
+  background-image: url(../img/pieces/black/knight.svg);
+}
+.Square-king-black {
+  background-image: url(../img/pieces/black/king.svg);
+}
+.Square-queen-black {
+  background-image: url(../img/pieces/black/queen.svg);
+}
