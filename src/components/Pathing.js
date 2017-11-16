@@ -137,6 +137,16 @@ export function pathKing(x, y) {
   return pathArray;
 }
 
+export function pathPawn(x, y, army) {
+  const pathArray = [];
+  if (army === "black") {
+    x + 1 < 8 ? pathArray.push({ x: x + 1, y: y }) : "outSideBoard";
+  } else {
+    x - 1 >= 0 ? pathArray.push({ x: x - 1, y: y }) : "outSideBoard";
+  }
+  return pathArray;
+}
+
 // function bishopCollision(x1, y1, layout, army) {
 //   const pathArray = [];
 //   let army1 = "";

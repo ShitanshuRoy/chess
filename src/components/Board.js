@@ -1,13 +1,14 @@
 import React from "react";
 import Square from "./Square";
 import * as Pathing from "./Pathing.js";
+import * as Colission from "./Colission.js";
 import "./css/Board.css";
 export default class Board extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       fen:
-        "rnbqkbnr/pppppppp/00000000/00000000/00000000/00000000/PPPPPPPP/RNBQKBNR",
+        "rnbqk0nr/pppppppp/0000000b/00000000/00000000/00000B00/PPPPPPPP/RNBQK0NR",
       turn: "w",
       layout: [],
       boardCoordinates: {},
@@ -19,8 +20,8 @@ export default class Board extends React.Component {
   }
   componentDidMount() {
     let level1 = this.state.fen.split("/");
-    let level2 = level1.map(level => {
-      return level.split("");
+    let layout = this.state.fen.split("/").map(rank => {
+      return rank.split("");
       // if (isNaN(parseInt(level3))) {
       //   console.log(level3);
       //   return level3;
@@ -33,7 +34,7 @@ export default class Board extends React.Component {
       // }
     });
 
-    this.setState({ layout: level2 });
+    this.setState({ layout: layout });
     const boardCoordinates = {
       top: this.boardDiv.offsetTop,
       bottom: this.boardDiv.offsetHeight + this.boardDiv.offsetTop,
@@ -91,6 +92,14 @@ export default class Board extends React.Component {
         switch (symbol) {
           case "P":
             console.log("pawn");
+
+            const pawnPathing = Pathing.pathPawn(
+              Math.floor(i / 8),
+              i % 8,
+              army
+            );
+            //To test Pathing
+            this.setState({ path: pawnPathing });
             break;
           case "R":
             const rookPathing = Pathing.pathRook(Math.floor(i / 8), i % 8);
@@ -107,7 +116,14 @@ export default class Board extends React.Component {
             this.setState({ path: knightPathing });
             break;
           case "B":
-            const bishopPathing = Pathing.pathBishop(Math.floor(i / 8), i % 8);
+            const bishopPathing = [];
+            const bishopPathingOptimistic = Pathing.pathBishop(
+              Math.floor(i / 8),
+              i % 8
+            );
+            bishopPathingOptimistic.map(path => {
+              bishopPathing.push(Colission.path(path, this.state.layout, army));
+            });
             //To test Pathing
             const flattened2 = bishopPathing.reduce(function(a, b) {
               return a.concat(b);
@@ -122,6 +138,7 @@ export default class Board extends React.Component {
           case "Q":
             const queenPathing = Pathing.pathQueen(Math.floor(i / 8), i % 8);
             console.log(queenPathing);
+            //To test Pathing
             const flattened3 = queenPathing.reduce(function(a, b) {
               return a.concat(b);
             });
