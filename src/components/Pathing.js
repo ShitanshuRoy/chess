@@ -35,7 +35,6 @@ export function pathBishop(x, y) {
   while (x1 < 7 && y1 < 7) {
     x1++;
     y1++;
-
     pathArray.push({ x: x1, y: y1 });
   }
   allPaths.push(pathArray);
@@ -110,10 +109,7 @@ export function pathRook(x, y) {
 export function pathQueen(x, y) {
   const horizontalPathing = pathRook(x, y);
   const diagonalPathing = pathBishop(x, y);
-  const allPaths = horizontalPathing;
-  diagonalPathing.map(path => {
-    allPaths.push(path);
-  });
+  const allPaths = horizontalPathing.concat(diagonalPathing);
   return allPaths;
 }
 export function pathKing(x, y) {
@@ -141,8 +137,14 @@ export function pathPawn(x, y, army) {
   const pathArray = [];
   if (army === "black") {
     x + 1 < 8 ? pathArray.push({ x: x + 1, y: y }) : "outSideBoard";
+    if (x === 1) {
+      pathArray.push({ x: x + 2, y: y });
+    }
   } else {
     x - 1 >= 0 ? pathArray.push({ x: x - 1, y: y }) : "outSideBoard";
+    if (x === 6) {
+      pathArray.push({ x: x - 2, y: y });
+    }
   }
   return pathArray;
 }

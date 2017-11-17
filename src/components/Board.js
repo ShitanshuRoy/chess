@@ -8,7 +8,7 @@ export default class Board extends React.Component {
     super(props);
     this.state = {
       fen:
-        "rnbqk0nr/pppppppp/0000000b/00000000/00000000/00000B00/PPPPPPPP/RNBQK0NR",
+        "0nbqk0nr/p0pppp0p/rp000N0b/0p000R00/0PQ00nK0/P00k0B00/00PPPPPP/RNB0K0NR",
       turn: "w",
       layout: [],
       boardCoordinates: {},
@@ -19,7 +19,6 @@ export default class Board extends React.Component {
     this.offsets = [];
   }
   componentDidMount() {
-    let level1 = this.state.fen.split("/");
     let layout = this.state.fen.split("/").map(rank => {
       return rank.split("");
       // if (isNaN(parseInt(level3))) {
@@ -92,57 +91,114 @@ export default class Board extends React.Component {
         switch (symbol) {
           case "P":
             console.log("pawn");
-
-            const pawnPathing = Pathing.pathPawn(
+            const pawnPathing = [];
+            const pawnPathingOptimistic = Pathing.pathPawn(
               Math.floor(i / 8),
               i % 8,
               army
             );
+            pawnPathing.push(
+              Colission.pawnCollision(
+                pawnPathingOptimistic,
+                this.state.layout,
+                army
+              )
+            );
             //To test Pathing
-            this.setState({ path: pawnPathing });
+            this.setState({
+              path: pawnPathing.reduce(function(a, b) {
+                return a.concat(b);
+              })
+            });
             break;
           case "R":
-            const rookPathing = Pathing.pathRook(Math.floor(i / 8), i % 8);
-            console.log(rookPathing);
-            //To test Pathing
-            const flattened1 = rookPathing.reduce(function(a, b) {
-              return a.concat(b);
+            const rookPathingOptimistic = Pathing.pathRook(
+              Math.floor(i / 8),
+              i % 8
+            );
+            const rookPathing = rookPathingOptimistic.map(path => {
+              return Colission.path(path, this.state.layout, army);
             });
-            this.setState({ path: flattened1 });
+            //To test Pathing
+
+            this.setState({
+              path: rookPathing.reduce(function(a, b) {
+                return a.concat(b);
+              })
+            });
             break;
           case "N":
-            const knightPathing = Pathing.pathKnight(Math.floor(i / 8), i % 8);
+            const knightPathing = [];
+            const knightPathingOptimistic = Pathing.pathKnight(
+              Math.floor(i / 8),
+              i % 8
+            );
+            knightPathing.push(
+              Colission.points(knightPathingOptimistic, this.state.layout, army)
+            );
+            console.log(knightPathing);
             //To test Pathing
-            this.setState({ path: knightPathing });
+            this.setState({
+              path: knightPathing.reduce(function(a, b) {
+                return a.concat(b);
+              })
+            });
             break;
           case "B":
-            const bishopPathing = [];
             const bishopPathingOptimistic = Pathing.pathBishop(
               Math.floor(i / 8),
               i % 8
             );
-            bishopPathingOptimistic.map(path => {
-              bishopPathing.push(Colission.path(path, this.state.layout, army));
+            const bishopPathing = bishopPathingOptimistic.map(path => {
+              return Colission.path(path, this.state.layout, army);
             });
             //To test Pathing
-            const flattened2 = bishopPathing.reduce(function(a, b) {
-              return a.concat(b);
+
+            this.setState({
+              path: bishopPathing.reduce(function(a, b) {
+                return a.concat(b);
+              })
             });
-            this.setState({ path: flattened2 });
             break;
           case "K":
-            const kingPathing = Pathing.pathKing(Math.floor(i / 8), i % 8);
+            const kingPathing = [];
+            const kingPathingOptimistic = Pathing.pathKing(
+              Math.floor(i / 8),
+              i % 8
+            );
+            console.log(kingPathingOptimistic);
+            kingPathing.push(
+              Colission.points(kingPathingOptimistic, this.state.layout, army)
+            );
+            console.log(kingPathing);
+
             //To test Pathing
-            this.setState({ path: kingPathing });
+            this.setState({
+              path: kingPathing
+            });
+            //To test Pathing
+            this.setState({
+              path: kingPathing.reduce(function(a, b) {
+                return a.concat(b);
+              })
+            });
             break;
           case "Q":
-            const queenPathing = Pathing.pathQueen(Math.floor(i / 8), i % 8);
+            const queenPathing = [];
+            const queenPathingOptimistic = Pathing.pathQueen(
+              Math.floor(i / 8),
+              i % 8
+            );
+            queenPathingOptimistic.map(path => {
+              queenPathing.push(Colission.path(path, this.state.layout, army));
+            });
             console.log(queenPathing);
             //To test Pathing
-            const flattened3 = queenPathing.reduce(function(a, b) {
-              return a.concat(b);
+            this.setState({
+              path: queenPathing.reduce(function(a, b) {
+                return a.concat(b);
+              })
             });
-            this.setState({ path: flattened3 });
             break;
           default:
             console.log("none");

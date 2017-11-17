@@ -8,6 +8,7 @@
   background-position: center;
   background-size: contain;
   background-color: #e6e6e6;
+  border: 1px solid #4d4d4d;
   background-repeat: no-repeat;
   transition: 300ms;
   pointer-events: none;
@@ -24,6 +25,9 @@
 }
 .Square-path {
   background-color: green;
+}
+.Square-attack {
+  background-color: red;
 }
 .Square-pawn-white {
   background-image: url(../img/pieces/white/pawn.svg);

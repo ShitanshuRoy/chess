@@ -25,13 +25,18 @@ export default class Square extends React.Component {
   render() {
     //console.log(this.props.coOrdinates.x);
     let PATH = false;
+    let ATTACK = false;
     if (this.props.path) {
       this.props.path.forEach((k, i) => {
         if (
           k.x === this.props.coOrdinates.x &&
           k.y === this.props.coOrdinates.y
         ) {
-          PATH = true;
+          if (k.hasEnemy) {
+            ATTACK = true;
+          } else {
+            PATH = true;
+          }
         }
       });
     }
@@ -102,7 +107,8 @@ export default class Square extends React.Component {
       "Square-dragged": this.state.dragging,
       "Square-hovered": DRAGGED_OVER,
       "Square-dragged": DRAGGED,
-      "Square-path": PATH
+      "Square-path": PATH,
+      "Square-attack": ATTACK
     });
 
     return (
