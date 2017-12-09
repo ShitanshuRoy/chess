@@ -14,11 +14,13 @@ export default class Board extends React.Component {
       boardCoordinates: {},
       mouseCoordinates: {},
       dragging: false,
-      selectedPiece: "0"
+      selectedPiece: "0",
+      validTarget: false
     };
     this.offsets = [];
   }
   componentDidMount() {
+    console.log("component mounted");
     let layout = this.state.fen.split("/").map(rank => {
       return rank.split("");
       // if (isNaN(parseInt(level3))) {
@@ -47,12 +49,16 @@ export default class Board extends React.Component {
   }
   changeLayout(start, end) {
     let pos = this.state.layout;
-    pos[start.x][start.y] = "0";
-    pos[end.x][end.y] = "N";
-    this.setState({ layout: pos });
+    let temp = (pos[start.x][start.y] = "0");
+    pos[end.x][end.y] = this.state.selectedPiece;
+    this.setState({ layout: pos }, () => {
+      this.resetSoft();
+    });
+  }
+  resetSoft() {
+    this.setState({ path: [], selectedCoordinates: false });
   }
   getDraggedElement(piece) {
-    console.log(piece);
     this.setState({ selectedPiece: piece });
   }
 
@@ -60,6 +66,45 @@ export default class Board extends React.Component {
   handleMouseMove(event) {
     const mouseCoordinates = { x: event.pageX, y: event.pageY };
     this.setState({ mouseCoordinates: mouseCoordinates });
+    if (this.state.dragging) {
+      this.offsets.forEach((offset, i) => {
+        if (
+          this.state.mouseCoordinates.x > offset.left &&
+          this.state.mouseCoordinates.x < offset.right &&
+          this.state.mouseCoordinates.y > offset.top &&
+          this.state.mouseCoordinates.y < offset.bottom
+        ) {
+          if (
+            this.state.path.filter(
+              path => path.x === Math.floor(i / 8) && path.y === i % 8
+            )[0]
+          ) {
+            this.setState({
+              validTarget: { x: Math.floor(i / 8), y: i % 8 }
+            });
+            console.log(this.state.layout[Math.floor(i / 8)][i % 8]);
+          } else {
+            this.setState({ validTarget: false });
+          }
+          // console.log(
+          //   "hasEnemy:" +
+          //     this.state.path.includes({
+          //       x: Math.floor(i / 8),
+          //       y: i % 8,
+          //       hasEnemy: true
+          //     })
+          // );
+          // console.log(
+          //   "doesNothaveEnemy:" +
+          //     this.state.path.includes({
+          //       x: Math.floor(i / 8),
+          //       y: i % 8,
+          //       hasEnemy: false
+          //     })
+          // );
+        }
+      });
+    }
   }
   handleMouseLeave() {
     this.setState({ mouseCoordinates: {} });
@@ -69,7 +114,6 @@ export default class Board extends React.Component {
   handleMouseDown(event) {
     this.setState({ dragging: true });
     const mouseCoordinates = { x: event.pageX, y: event.pageY };
-
     this.setState({ draggedCoordinates: mouseCoordinates });
     this.offsets.forEach((offset, i) => {
       if (
@@ -83,7 +127,8 @@ export default class Board extends React.Component {
         // console.log(this.state.layout[0][1]);
 
         this.setState({
-          selectedPiece: selectedPiece
+          selectedPiece: selectedPiece,
+          selectedCoordinates: { x: Math.floor(i / 8), y: i % 8 }
         });
         const symbol = selectedPiece.toUpperCase();
         const army = selectedPiece === symbol ? "white" : "black";
@@ -136,7 +181,7 @@ export default class Board extends React.Component {
             knightPathing.push(
               Colission.points(knightPathingOptimistic, this.state.layout, army)
             );
-            console.log(knightPathing);
+
             //To test Pathing
             this.setState({
               path: knightPathing.reduce(function(a, b) {
@@ -166,11 +211,10 @@ export default class Board extends React.Component {
               Math.floor(i / 8),
               i % 8
             );
-            console.log(kingPathingOptimistic);
+
             kingPathing.push(
               Colission.points(kingPathingOptimistic, this.state.layout, army)
             );
-            console.log(kingPathing);
 
             //To test Pathing
             this.setState({
@@ -192,7 +236,7 @@ export default class Board extends React.Component {
             queenPathingOptimistic.map(path => {
               queenPathing.push(Colission.path(path, this.state.layout, army));
             });
-            console.log(queenPathing);
+
             //To test Pathing
             this.setState({
               path: queenPathing.reduce(function(a, b) {
@@ -210,6 +254,9 @@ export default class Board extends React.Component {
     });
   }
   handleMouseUp() {
+    if (this.state.validTarget) {
+      this.changeLayout(this.state.selectedCoordinates, this.state.validTarget);
+    }
     this.setState({ dragging: false });
     this.setState({ draggedCoordinates: {} });
   }
