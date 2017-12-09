@@ -42,30 +42,15 @@ export default class Square extends React.Component {
     }
     let DRAGGED = false;
     let DRAGGED_OVER = false;
-    if (this.props.dragging) {
-      if (
-        this.props.mouseCoordinates.x > this.state.boundingBox.left &&
-        this.props.mouseCoordinates.x < this.state.boundingBox.right &&
-        this.props.mouseCoordinates.y > this.state.boundingBox.top &&
-        this.props.mouseCoordinates.y < this.state.boundingBox.bottom
-      ) {
-        DRAGGED_OVER = true;
-      } else {
-        DRAGGED_OVER = false;
-      }
-      if (this.props.piece !== 0 && this.props.piece !== "0") {
-        if (
-          this.props.draggedCoordinates.x > this.state.boundingBox.left &&
-          this.props.draggedCoordinates.x < this.state.boundingBox.right &&
-          this.props.draggedCoordinates.y > this.state.boundingBox.top &&
-          this.props.draggedCoordinates.y < this.state.boundingBox.bottom
-        ) {
-          DRAGGED = true;
-        } else {
-          DRAGGED = false;
-        }
-      }
+    if (
+      this.props.validDragOver.x === this.props.coOrdinates.x &&
+      this.props.validDragOver.y === this.props.coOrdinates.y
+    ) {
+      DRAGGED_OVER = true;
+    } else {
+      DRAGGED_OVER = false;
     }
+
     let pieceClass = "";
     let colorClass = "";
     if (!isNaN(parseInt(this.props.piece))) {

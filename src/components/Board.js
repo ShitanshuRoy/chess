@@ -15,12 +15,13 @@ export default class Board extends React.Component {
       mouseCoordinates: {},
       dragging: false,
       selectedPiece: "0",
-      validTarget: false
+      validTarget: false,
+      fallenWhite: [],
+      fallenBlack: []
     };
     this.offsets = [];
   }
   componentDidMount() {
-    console.log("component mounted");
     let layout = this.state.fen.split("/").map(rank => {
       return rank.split("");
       // if (isNaN(parseInt(level3))) {
@@ -48,21 +49,33 @@ export default class Board extends React.Component {
     this.offsets.push(offset);
   }
   changeLayout(start, end) {
-    let pos = this.state.layout;
-    let temp = (pos[start.x][start.y] = "0");
-    pos[end.x][end.y] = this.state.selectedPiece;
-    this.setState({ layout: pos }, () => {
-      this.resetSoft();
-    });
+    if (!(start.x === end.x && start.y === end.y)) {
+      let pos = this.state.layout;
+      let temp = (pos[start.x][start.y] = "0");
+      pos[end.x][end.y] = this.state.selectedPiece;
+      this.setState({ layout: pos }, () => {
+        //ADD ELIMINATED PIECES LOGIC GOES HERE
+        // if (isNaN(parseInt(this.state.layout[(end.x, end.y)]))) {
+        //   if (
+        //     this.state.layout[(end.x, end.y)] ===
+        //     this.state.layout[(end.x, end.y)].toUpperCase()
+        //   ) {
+        //     console.log("white piece eliminated");
+        //   } else {
+        //     console.log("black piece eliminated");
+        //   }
+        // }
+        this.resetSoft();
+      });
+    }
   }
   resetSoft() {
-    this.setState({ path: [], selectedCoordinates: false });
+    this.setState({ path: [], selectedCoordinates: false, validTarget: false });
   }
   getDraggedElement(piece) {
     this.setState({ selectedPiece: piece });
   }
 
-  //onClick={() => this.changelayout({ y: 1, x: 7 }, { y: 2, x: 5 })}
   handleMouseMove(event) {
     const mouseCoordinates = { x: event.pageX, y: event.pageY };
     this.setState({ mouseCoordinates: mouseCoordinates });
@@ -82,7 +95,6 @@ export default class Board extends React.Component {
             this.setState({
               validTarget: { x: Math.floor(i / 8), y: i % 8 }
             });
-            console.log(this.state.layout[Math.floor(i / 8)][i % 8]);
           } else {
             this.setState({ validTarget: false });
           }
@@ -263,41 +275,46 @@ export default class Board extends React.Component {
   render() {
     let black = false;
     return (
-      <div
-        className="Board"
-        ref={div => {
-          this.boardDiv = div;
-        }}
-        onMouseMove={e => this.handleMouseMove(e)}
-        onMouseLeave={() => this.handleMouseLeave()}
-        onMouseDown={e => this.handleMouseDown(e)}
-        onMouseUp={() => this.handleMouseUp()}
-      >
-        {this.state.layout.map((s, i) => {
-          let isEven = i % 2 === 0 ? true : false;
-          let x1 = i;
-          return s.map((k, i) => {
-            let adjustRowEven = i;
-            if (isEven) {
-              adjustRowEven = i + 1;
-            }
-            black = adjustRowEven % 2 === 0 ? true : false;
-            return (
-              <Square
-                key={i}
-                piece={k}
-                black={black}
-                updateOffset={offset => this.updateOffset(offset)}
-                mouseCoordinates={this.state.mouseCoordinates}
-                dragging={this.state.dragging}
-                draggedCoordinates={this.state.draggedCoordinates}
-                getDraggedElement={piece => this.getDraggedElement(piece)}
-                coOrdinates={{ x: x1, y: i }}
-                path={this.state.path}
-              />
-            );
-          });
-        })}
+      <div className="Board-holder">
+        <div className="Board-fallen-pieces" />
+        <div
+          className="Board"
+          ref={div => {
+            this.boardDiv = div;
+          }}
+          onMouseMove={e => this.handleMouseMove(e)}
+          onMouseLeave={() => this.handleMouseLeave()}
+          onMouseDown={e => this.handleMouseDown(e)}
+          onMouseUp={() => this.handleMouseUp()}
+        >
+          {this.state.layout.map((s, i) => {
+            let isEven = i % 2 === 0 ? true : false;
+            let x1 = i;
+            return s.map((k, i) => {
+              let adjustRowEven = i;
+              if (isEven) {
+                adjustRowEven = i + 1;
+              }
+              black = adjustRowEven % 2 === 0 ? true : false;
+              return (
+                <Square
+                  key={i}
+                  piece={k}
+                  black={black}
+                  updateOffset={offset => this.updateOffset(offset)}
+                  mouseCoordinates={this.state.mouseCoordinates}
+                  dragging={this.state.dragging}
+                  //  draggedCoordinates={this.state.draggedCoordinates}
+                  validDragOver={this.state.validTarget}
+                  getDraggedElement={piece => this.getDraggedElement(piece)}
+                  coOrdinates={{ x: x1, y: i }}
+                  path={this.state.path}
+                />
+              );
+            });
+          })}
+        </div>
+        <div className="Board-fallen-pieces" />
       </div>
     );
   }

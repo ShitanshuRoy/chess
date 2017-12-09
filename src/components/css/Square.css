@@ -16,9 +16,6 @@
 .Square-black {
   background-color: #4d4d4d;
 }
-.Square-hovered {
-  background-color: purple;
-}
 
 .Square-dragged {
   background-color: blue;
@@ -29,6 +26,10 @@
 .Square-attack {
   background-color: red;
 }
+.Square-hovered {
+  background-color: purple;
+}
+
 .Square-pawn-white {
   background-image: url(../img/pieces/white/pawn.svg);
 }

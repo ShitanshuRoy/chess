@@ -1,5 +1,18 @@
+.Board-holder {
+  width: 100%;
+  height: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.Board-fallen-pieces {
+  width: 100px;
+  height: 640px;
+  align-items: center;
+  justify-content: center;
+}
 .Board {
-  width: 642px;
-  height: 642px;
+  width: 640px;
+  height: 640px;
   cursor: pointer;
 }
