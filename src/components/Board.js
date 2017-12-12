@@ -1,5 +1,7 @@
 import React from "react";
 import Square from "./Square";
+import Piece from "./Piece";
+import _ from "lodash";
 import * as Pathing from "./Pathing.js";
 import * as Colission from "./Colission.js";
 import "./css/Board.css";
@@ -24,16 +26,6 @@ export default class Board extends React.Component {
   componentDidMount() {
     let layout = this.state.fen.split("/").map(rank => {
       return rank.split("");
-      // if (isNaN(parseInt(level3))) {
-      //   console.log(level3);
-      //   return level3;
-      // } else {
-      //   let tempArr = [];
-      //   for (let k = 0; k < parseInt(level3); k++) {
-      //     tempArr.push("nul");
-      //   }
-      //   return tempArr;
-      // }
     });
 
     this.setState({ layout: layout });
@@ -51,20 +43,30 @@ export default class Board extends React.Component {
   changeLayout(start, end) {
     if (!(start.x === end.x && start.y === end.y)) {
       let pos = this.state.layout;
-      let temp = (pos[start.x][start.y] = "0");
+      let temp = pos[start.x][start.y];
+      pos[start.x][start.y] = "0";
+      //ADD ELIMINATED PIECES LOGIC GOES HERE
+
+      if (Colission.hasPiece(pos[end.x][end.y])) {
+        if (
+          Colission.checkArmy(Colission.hasPiece, pos[end.x][end.y]) === "white"
+        ) {
+          // let fallenWhite1 = _.cloneDeep(this.state.fallenWhite);
+          let fallenWhite = this.state.fallenWhite;
+          console.log(fallenWhite);
+          console.log(pos[end.x][end.y]);
+          fallenWhite.push(pos[end.x][end.y]);
+
+          this.setState({ fallenWhite });
+        } else {
+          const fallenBlack = this.state.fallenBlack;
+          fallenBlack.push(pos[end.x][end.y]);
+          this.setState({ fallenBlack });
+        }
+      }
       pos[end.x][end.y] = this.state.selectedPiece;
+
       this.setState({ layout: pos }, () => {
-        //ADD ELIMINATED PIECES LOGIC GOES HERE
-        // if (isNaN(parseInt(this.state.layout[(end.x, end.y)]))) {
-        //   if (
-        //     this.state.layout[(end.x, end.y)] ===
-        //     this.state.layout[(end.x, end.y)].toUpperCase()
-        //   ) {
-        //     console.log("white piece eliminated");
-        //   } else {
-        //     console.log("black piece eliminated");
-        //   }
-        // }
         this.resetSoft();
       });
     }
@@ -98,22 +100,6 @@ export default class Board extends React.Component {
           } else {
             this.setState({ validTarget: false });
           }
-          // console.log(
-          //   "hasEnemy:" +
-          //     this.state.path.includes({
-          //       x: Math.floor(i / 8),
-          //       y: i % 8,
-          //       hasEnemy: true
-          //     })
-          // );
-          // console.log(
-          //   "doesNothaveEnemy:" +
-          //     this.state.path.includes({
-          //       x: Math.floor(i / 8),
-          //       y: i % 8,
-          //       hasEnemy: false
-          //     })
-          // );
         }
       });
     }
@@ -135,8 +121,6 @@ export default class Board extends React.Component {
         this.state.mouseCoordinates.y < offset.bottom
       ) {
         const selectedPiece = this.state.layout[Math.floor(i / 8)][i % 8];
-        //console.log(this.state.layout[Math.floor(i / 8)][i % 8]);
-        // console.log(this.state.layout[0][1]);
 
         this.setState({
           selectedPiece: selectedPiece,
@@ -163,7 +147,7 @@ export default class Board extends React.Component {
             );
             //To test Pathing
             this.setState({
-              path: pawnPathing.reduce(function(a, b) {
+              path: pawnPathing.reduce((a, b) => {
                 return a.concat(b);
               })
             });
@@ -179,7 +163,7 @@ export default class Board extends React.Component {
             //To test Pathing
 
             this.setState({
-              path: rookPathing.reduce(function(a, b) {
+              path: rookPathing.reduce((a, b) => {
                 return a.concat(b);
               })
             });
@@ -196,7 +180,7 @@ export default class Board extends React.Component {
 
             //To test Pathing
             this.setState({
-              path: knightPathing.reduce(function(a, b) {
+              path: knightPathing.reduce((a, b) => {
                 return a.concat(b);
               })
             });
@@ -212,7 +196,7 @@ export default class Board extends React.Component {
             //To test Pathing
 
             this.setState({
-              path: bishopPathing.reduce(function(a, b) {
+              path: bishopPathing.reduce((a, b) => {
                 return a.concat(b);
               })
             });
@@ -234,7 +218,7 @@ export default class Board extends React.Component {
             });
             //To test Pathing
             this.setState({
-              path: kingPathing.reduce(function(a, b) {
+              path: kingPathing.reduce((a, b) => {
                 return a.concat(b);
               })
             });
@@ -251,7 +235,7 @@ export default class Board extends React.Component {
 
             //To test Pathing
             this.setState({
-              path: queenPathing.reduce(function(a, b) {
+              path: queenPathing.reduce((a, b) => {
                 return a.concat(b);
               })
             });
@@ -274,9 +258,15 @@ export default class Board extends React.Component {
   }
   render() {
     let black = false;
+    console.log(this.state);
     return (
       <div className="Board-holder">
-        <div className="Board-fallen-pieces" />
+        <div className="Board-fallen-pieces">
+          {this.state.fallenWhite &&
+            this.state.fallenWhite.map(piece => {
+              return <Piece piece={piece} />;
+            })}
+        </div>
         <div
           className="Board"
           ref={div => {
@@ -314,7 +304,12 @@ export default class Board extends React.Component {
             });
           })}
         </div>
-        <div className="Board-fallen-pieces" />
+        <div className="Board-fallen-pieces">
+          {this.state.fallenBlack &&
+            this.state.fallenBlack.map(piece => {
+              return <Piece piece={piece} />;
+            })}
+        </div>
       </div>
     );
   }

@@ -1,6 +1,7 @@
 import React from "react";
 import "./css/Square.css";
 import classNames from "classnames";
+import { hasPiece, checkArmy } from "./Colission";
 export default class Square extends React.Component {
   constructor(props) {
     super(props);
@@ -52,7 +53,7 @@ export default class Square extends React.Component {
     }
 
     let pieceClass = "";
-    let colorClass = "";
+    let armyClass = "";
     if (!isNaN(parseInt(this.props.piece))) {
       pieceClass = "";
     } else {
@@ -81,13 +82,13 @@ export default class Square extends React.Component {
           break;
       }
       if (this.props.piece === this.props.piece.toUpperCase()) {
-        colorClass = "-white";
+        armyClass = "-white";
       } else if (this.props.piece !== this.props.piece.toUpperCase()) {
-        colorClass = "-black";
+        armyClass = "-black";
       }
     }
 
-    let className = classNames("Square", `Square${pieceClass}${colorClass}`, {
+    let className = classNames("Square", `Square${pieceClass}${armyClass}`, {
       "Square-black": this.props.black,
       "Square-dragged": this.state.dragging,
       "Square-hovered": DRAGGED_OVER,

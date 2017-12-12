@@ -6,9 +6,11 @@
   justify-content: center;
 }
 .Board-fallen-pieces {
-  width: 100px;
+  width: 80px;
   height: 640px;
+  display: flex;
   align-items: center;
+  flex-direction: column;
   justify-content: center;
 }
 .Board {
