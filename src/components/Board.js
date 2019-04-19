@@ -1,7 +1,6 @@
 import React from "react";
 import Square from "./Square";
 import Piece from "./Piece";
-import _ from "lodash";
 import * as Pathing from "./Pathing.js";
 import * as Colission from "./Colission.js";
 import "./css/Board.css";
@@ -44,21 +43,12 @@ export default class Board extends React.Component {
     changeLayout(start, end) {
         if (!(start.x === end.x && start.y === end.y)) {
             let pos = this.state.layout;
-            let temp = pos[start.x][start.y];
             pos[start.x][start.y] = "0";
             //ADD ELIMINATED PIECES LOGIC GOES HERE
 
             if (Colission.hasPiece(pos[end.x][end.y])) {
-                if (
-                    Colission.checkArmy(
-                        Colission.hasPiece,
-                        pos[end.x][end.y]
-                    ) === "white"
-                ) {
-                    // let fallenWhite1 = _.cloneDeep(this.state.fallenWhite);
+                if (Colission.checkArmy(pos[end.x][end.y]) === "white") {
                     let fallenWhite = this.state.fallenWhite;
-                    console.log(fallenWhite);
-                    console.log(pos[end.x][end.y]);
                     fallenWhite.push(pos[end.x][end.y]);
 
                     this.setState({ fallenWhite });
@@ -85,7 +75,13 @@ export default class Board extends React.Component {
     getDraggedElement(piece) {
         this.setState({ selectedPiece: piece });
     }
-
+    setNavigablePath = pathing => {
+        this.setState({
+            path: pathing.reduce((a, b) => {
+                return a.concat(b);
+            })
+        });
+    };
     handleMouseMove(event) {
         const mouseCoordinates = { x: event.pageX, y: event.pageY };
         this.setState({ mouseCoordinates: mouseCoordinates });
@@ -142,7 +138,6 @@ export default class Board extends React.Component {
 
                 switch (symbol) {
                     case "P":
-                        console.log("pawn");
                         const pawnPathing = [];
                         const pawnPathingOptimistic = Pathing.pathPawn(
                             Math.floor(i / 8),
@@ -162,6 +157,7 @@ export default class Board extends React.Component {
                                 return a.concat(b);
                             })
                         });
+                        this.setNavigablePath(pawnPathing);
                         break;
                     case "R":
                         const rookPathingOptimistic = Pathing.pathRook(
@@ -176,12 +172,7 @@ export default class Board extends React.Component {
                             );
                         });
                         //To test Pathing
-
-                        this.setState({
-                            path: rookPathing.reduce((a, b) => {
-                                return a.concat(b);
-                            })
-                        });
+                        this.setNavigablePath(rookPathing);
                         break;
                     case "N":
                         const knightPathing = [];
@@ -197,12 +188,7 @@ export default class Board extends React.Component {
                             )
                         );
 
-                        //To test Pathing
-                        this.setState({
-                            path: knightPathing.reduce((a, b) => {
-                                return a.concat(b);
-                            })
-                        });
+                        this.setNavigablePath(knightPathing, army);
                         break;
                     case "B":
                         const bishopPathingOptimistic = Pathing.pathBishop(
@@ -219,12 +205,7 @@ export default class Board extends React.Component {
                             }
                         );
                         //To test Pathing
-
-                        this.setState({
-                            path: bishopPathing.reduce((a, b) => {
-                                return a.concat(b);
-                            })
-                        });
+                        this.setNavigablePath(bishopPathing, army);
                         break;
                     case "K":
                         const kingPathing = [];
@@ -240,36 +221,24 @@ export default class Board extends React.Component {
                                 army
                             )
                         );
-
-                        //To test Pathing
-                        this.setState({
-                            path: kingPathing
-                        });
-                        //To test Pathing
-                        this.setState({
-                            path: kingPathing.reduce((a, b) => {
-                                return a.concat(b);
-                            })
-                        });
+                        this.setNavigablePath(kingPathing, army);
                         break;
                     case "Q":
-                        const queenPathing = [];
                         const queenPathingOptimistic = Pathing.pathQueen(
                             Math.floor(i / 8),
                             i % 8
                         );
-                        queenPathingOptimistic.map(path => {
-                            queenPathing.push(
-                                Colission.path(path, this.state.layout, army)
-                            );
-                        });
+                        const queenPathing = queenPathingOptimistic.map(
+                            path => {
+                                return Colission.path(
+                                    path,
+                                    this.state.layout,
+                                    army
+                                );
+                            }
+                        );
 
-                        //To test Pathing
-                        this.setState({
-                            path: queenPathing.reduce((a, b) => {
-                                return a.concat(b);
-                            })
-                        });
+                        this.setNavigablePath(queenPathing, army);
                         break;
                     default:
                         console.log("none");
@@ -282,6 +251,7 @@ export default class Board extends React.Component {
     }
     handleMouseUp() {
         if (this.state.validTarget) {
+            console.log(this.state.path);
             this.changeLayout(
                 this.state.selectedCoordinates,
                 this.state.validTarget
@@ -292,7 +262,7 @@ export default class Board extends React.Component {
     }
     render() {
         let black = false;
-        console.log(this.state);
+
         return (
             <div className="Board-holder">
                 <div className="Board-fallen-pieces">
@@ -332,7 +302,6 @@ export default class Board extends React.Component {
                                         this.state.mouseCoordinates
                                     }
                                     dragging={this.state.dragging}
-                                    //  draggedCoordinates={this.state.draggedCoordinates}
                                     validDragOver={this.state.validTarget}
                                     getDraggedElement={piece =>
                                         this.getDraggedElement(piece)
