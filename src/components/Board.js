@@ -82,6 +82,11 @@ export default class Board extends React.Component {
             })
         });
     };
+    getNavigablePath = pathing => {
+        return pathing.reduce((a, b) => {
+            return a.concat(b);
+        });
+    };
     handleMouseMove(event) {
         const mouseCoordinates = { x: event.pageX, y: event.pageY };
         this.setState({ mouseCoordinates: mouseCoordinates });
@@ -114,6 +119,127 @@ export default class Board extends React.Component {
         this.setState({ draggedCoordinates: {} });
         this.setState({ dragging: false });
     }
+    getAllPaths = () => {
+        const filterLayout = [].concat(
+            ...this.state.layout.map((row, i) => {
+                return row
+                    .map((column, j) => {
+                        return { column, i, j };
+                    })
+                    .filter(val => {
+                        return val.column !== "0";
+                    });
+            })
+        );
+        console.log(filterLayout);
+        const checkMap = filterLayout.map(val => {
+            const { i, j, column } = val;
+
+            const army = column === column.toUpperCase() ? "white" : "black";
+
+            switch (column.toUpperCase()) {
+                case "P":
+                    const pawnPathing = [];
+                    const pawnPathingOptimistic = Pathing.pathPawn(i, j, army);
+                    pawnPathing.push(
+                        Colission.pawnCollision(
+                            pawnPathingOptimistic,
+                            this.state.layout,
+                            army
+                        )
+                    );
+                    return {
+                        piece: column,
+                        path: this.getNavigablePath(pawnPathing)
+                    };
+                    break;
+                case "R":
+                    const rookPathingOptimistic = Pathing.pathRook(i, j);
+                    const rookPathing = rookPathingOptimistic.map(path => {
+                        return Colission.path(path, this.state.layout, army);
+                    });
+                    return {
+                        piece: column,
+                        path: this.getNavigablePath(rookPathing)
+                    };
+                    break;
+                case "N":
+                    const knightPathing = [];
+                    const knightPathingOptimistic = Pathing.pathKnight(i, j);
+                    knightPathing.push(
+                        Colission.points(
+                            knightPathingOptimistic,
+                            this.state.layout,
+                            army
+                        )
+                    );
+                    return {
+                        piece: column,
+                        path: this.getNavigablePath(knightPathing)
+                    };
+
+                    break;
+                case "B":
+                    const bishopPathingOptimistic = Pathing.pathBishop(i, j);
+                    const bishopPathing = bishopPathingOptimistic.map(path => {
+                        return Colission.path(path, this.state.layout, army);
+                    });
+                    //To test Pathing
+                    return {
+                        piece: column,
+                        path: this.getNavigablePath(bishopPathing)
+                    };
+
+                    break;
+                case "K":
+                    const kingPathing = [];
+                    const kingPathingOptimistic = Pathing.pathKing(i, j);
+
+                    kingPathing.push(
+                        Colission.points(
+                            kingPathingOptimistic,
+                            this.state.layout,
+                            army
+                        )
+                    );
+                    return {
+                        piece: column,
+                        path: this.getNavigablePath(kingPathing)
+                    };
+                    break;
+                case "Q":
+                    const queenPathingOptimistic = Pathing.pathQueen(i, j);
+                    const queenPathing = queenPathingOptimistic.map(path => {
+                        return Colission.path(path, this.state.layout, army);
+                    });
+
+                    return {
+                        piece: column,
+                        path: this.getNavigablePath(queenPathing)
+                    };
+                    break;
+                default:
+                    console.log("none");
+                    break;
+            }
+        });
+        console.log(checkMap);
+        const isCheck = checkMap
+            .map(val => {
+                return val.path
+                    .map(value => {
+                        return { piece: val.piece, data: value };
+                    })
+                    .filter(val => {
+                        return val.data.hasKing;
+                    });
+            })
+            .filter(val => {
+                return val.length > 0;
+            });
+        console.log(isCheck);
+    };
+
     handleMouseDown(event) {
         this.setState({ dragging: true });
         const mouseCoordinates = { x: event.pageX, y: event.pageY };
@@ -251,7 +377,6 @@ export default class Board extends React.Component {
     }
     handleMouseUp() {
         if (this.state.validTarget) {
-            console.log(this.state.path);
             this.changeLayout(
                 this.state.selectedCoordinates,
                 this.state.validTarget
@@ -259,6 +384,7 @@ export default class Board extends React.Component {
         }
         this.setState({ dragging: false });
         this.setState({ draggedCoordinates: {} });
+        this.getAllPaths();
     }
     render() {
         let black = false;
