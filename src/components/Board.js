@@ -19,7 +19,8 @@ export default class Board extends React.Component {
             selectedPiece: "0",
             validTarget: false,
             fallenWhite: [],
-            fallenBlack: []
+            fallenBlack: [],
+            inCheck: null
         };
         this.offsets = [];
     }
@@ -131,7 +132,7 @@ export default class Board extends React.Component {
                     });
             })
         );
-        console.log(filterLayout);
+
         const checkMap = filterLayout.map(val => {
             const { i, j, column } = val;
 
@@ -223,21 +224,30 @@ export default class Board extends React.Component {
                     break;
             }
         });
-        console.log(checkMap);
-        const isCheck = checkMap
+
+        const checks = checkMap
             .map(val => {
-                return val.path
-                    .map(value => {
-                        return { piece: val.piece, data: value };
-                    })
-                    .filter(val => {
-                        return val.data.hasKing;
-                    });
+                return val.path.map(value => {
+                    return { piece: val.piece, data: value };
+                });
             })
             .filter(val => {
-                return val.length > 0;
+                return val
+                    .map(val1 => {
+                        return val1.data.hasKing;
+                    })
+                    .includes(true);
             });
-        console.log(isCheck);
+        console.log(checks);
+        if (checks.length > 0) {
+            if (checks[0][0].piece === checks[0][0].piece.toUpperCase()) {
+                this.setState({ inCheck: "black" });
+            } else {
+                this.setState({ inCheck: "white" });
+            }
+        } else {
+            this.setState({ inCheck: null });
+        }
     };
 
     handleMouseDown(event) {
@@ -385,6 +395,7 @@ export default class Board extends React.Component {
         this.setState({ dragging: false });
         this.setState({ draggedCoordinates: {} });
         this.getAllPaths();
+        this.resetSoft();
     }
     render() {
         let black = false;
